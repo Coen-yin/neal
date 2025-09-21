@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GameHub - Play Amazing Games</title>
+    <title>NealHub - Creative Games & Experiments</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -11,7 +11,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <h1>GameHub</h1>
+                <h1>NealHub</h1>
             </div>
             <div class="nav-links">
                 <a href="#home" class="nav-link active">Home</a>
@@ -24,8 +24,8 @@
     <main>
         <section id="home" class="hero">
             <div class="hero-content">
-                <h1 class="hero-title">Welcome to GameHub</h1>
-                <p class="hero-subtitle">The ultimate destination for amazing web games</p>
+                <h1 class="hero-title">Welcome to NealHub</h1>
+                <p class="hero-subtitle">Creative games & experiments that spark curiosity</p>
                 <button class="cta-button" onclick="scrollToGames()">Start Playing</button>
             </div>
             <div class="hero-animation">
@@ -82,14 +82,42 @@
                         <p>Improve your typing speed</p>
                         <div class="play-button">Play Now</div>
                     </div>
+                    
+                    <div class="game-card" onclick="openGame('infinitecraft')">
+                        <div class="game-icon">🧪</div>
+                        <h3>Infinite Craft</h3>
+                        <p>Combine elements to discover new ones!</p>
+                        <div class="play-button">Play Now</div>
+                    </div>
+                    
+                    <div class="game-card" onclick="openGame('passwordgame')">
+                        <div class="game-icon">🔐</div>
+                        <h3>Password Game</h3>
+                        <p>Create a password that satisfies all rules</p>
+                        <div class="play-button">Play Now</div>
+                    </div>
+                    
+                    <div class="game-card" onclick="openGame('lifechecker')">
+                        <div class="game-icon">⏰</div>
+                        <h3>Life Checker</h3>
+                        <p>See how much time you've spent alive</p>
+                        <div class="play-button">Play Now</div>
+                    </div>
+                    
+                    <div class="game-card" onclick="openGame('universescale')">
+                        <div class="game-icon">🌌</div>
+                        <h3>Universe Scale</h3>
+                        <p>Explore the scale of everything in the universe</p>
+                        <div class="play-button">Play Now</div>
+                    </div>
                 </div>
             </div>
         </section>
 
         <section id="about" class="about-section">
             <div class="container">
-                <h2 class="section-title">About GameHub</h2>
-                <p class="about-text">GameHub is a modern gaming platform designed to provide the best web gaming experience. Our games are carefully crafted with smooth animations, responsive design, and engaging gameplay.</p>
+                <h2 class="section-title">About NealHub</h2>
+                <p class="about-text">NealHub is inspired by neal.fun's creative approach to web experiences. Our games focus on discovery, creativity, and mind-bending concepts that make you think differently about the world around you.</p>
             </div>
         </section>
     </main>
@@ -109,7 +137,7 @@
 
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 GameHub. Made with ❤️ for gamers everywhere.</p>
+            <p>&copy; 2024 NealHub. Made with ❤️ for curious minds everywhere.</p>
         </div>
     </footer>
 
