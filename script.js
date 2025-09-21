@@ -53,7 +53,8 @@ function openGame(gameType) {
         'typing': 'Type Racer',
         'infinitecraft': 'Infinite Craft',
         'passwordgame': 'Password Game',
-        'lifechecker': 'Life Checker'
+        'lifechecker': 'Life Checker',
+        'universescale': 'Universe Scale'
     };
     
     gameTitle.textContent = gameTitles[gameType] || 'Game';
@@ -273,6 +274,50 @@ function getGameHTML(gameType) {
                 </div>
             `;
         
+        case 'universescale':
+            return `
+                <div class="game-area">
+                    <div class="universe-header">
+                        <h3>Explore the Scale of the Universe</h3>
+                        <p>Drag the slider to journey from quantum to cosmic scales</p>
+                    </div>
+                    <div class="scale-controls">
+                        <div class="scale-slider-container">
+                            <input type="range" id="scaleSlider" min="0" max="60" value="30" class="scale-slider">
+                            <div class="scale-labels">
+                                <span>Quantum</span>
+                                <span>Atomic</span>
+                                <span>Molecular</span>
+                                <span>Cellular</span>
+                                <span>Human</span>
+                                <span>Planetary</span>
+                                <span>Stellar</span>
+                                <span>Galactic</span>
+                                <span>Universe</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="scale-display">
+                        <div class="current-scale">
+                            <div class="scale-value" id="scaleValue">1 meter</div>
+                            <div class="scale-description" id="scaleDescription">Human scale</div>
+                        </div>
+                        <div class="scale-visualization">
+                            <div class="scale-object" id="scaleObject">🧑‍🚀</div>
+                            <div class="scale-comparison" id="scaleComparison">
+                                You are here in the middle of known scales
+                            </div>
+                        </div>
+                    </div>
+                    <div class="scale-info">
+                        <div class="scale-facts" id="scaleFacts">
+                            <h4>Did you know?</h4>
+                            <p>The human body contains approximately 37 trillion cells, and you're made of atoms that were forged in the hearts of dying stars billions of years ago.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        
         default:
             return '<p>Game not found!</p>';
     }
@@ -307,6 +352,9 @@ function initializeGame(gameType) {
             break;
         case 'lifechecker':
             initLifeCheckerGame();
+            break;
+        case 'universescale':
+            initUniverseScaleGame();
             break;
     }
 }
@@ -1235,6 +1283,125 @@ function initLifeCheckerGame() {
     });
 }
 
+// Universe Scale Game
+function initUniverseScaleGame() {
+    const scaleSlider = document.getElementById('scaleSlider');
+    const scaleValue = document.getElementById('scaleValue');
+    const scaleDescription = document.getElementById('scaleDescription');
+    const scaleObject = document.getElementById('scaleObject');
+    const scaleComparison = document.getElementById('scaleComparison');
+    const scaleFacts = document.getElementById('scaleFacts');
+    
+    // Scale data from smallest to largest
+    const scaleData = [
+        // Quantum scale (0-6)
+        { size: 1e-35, unit: 'Planck length', emoji: '⚛️', description: 'Planck Scale', fact: 'The smallest meaningful length in physics. Below this scale, our current understanding of space and time breaks down.' },
+        { size: 1e-18, unit: 'attometers', emoji: '🔬', description: 'Subatomic Scale', fact: 'The size of quarks and other fundamental particles. At this scale, quantum mechanics rules everything.' },
+        { size: 1e-15, unit: 'femtometers', emoji: '⚛️', description: 'Nuclear Scale', fact: 'The size of atomic nuclei. Nuclear forces are incredibly strong at this distance.' },
+        { size: 1e-12, unit: 'picometers', emoji: '🧬', description: 'Atomic Scale', fact: 'Individual atoms. The entire periodic table exists at this scale.' },
+        { size: 1e-10, unit: 'angstroms', emoji: '🧪', description: 'Molecular Scale', fact: 'Chemical bonds and small molecules. This is where chemistry happens!' },
+        { size: 1e-9, unit: 'nanometers', emoji: '🦠', description: 'Nanoscale', fact: 'Viruses and DNA strands. Nanotechnology operates at this incredible scale.' },
+        { size: 1e-8, unit: 'nanometers', emoji: '🧬', description: 'Protein Scale', fact: 'Large proteins and virus particles. Complex molecular machines that make life possible.' },
+        
+        // Microscopic scale (7-19)
+        { size: 1e-7, unit: 'micrometers', emoji: '🦠', description: 'Bacterial Scale', fact: 'The smallest living organisms. Bacteria have been around for over 3.5 billion years.' },
+        { size: 1e-6, unit: 'micrometers', emoji: '🔬', description: 'Cellular Scale', fact: 'Most human cells. You have about 37 trillion cells in your body!' },
+        { size: 1e-5, unit: 'micrometers', emoji: '🧫', description: 'Large Cell Scale', fact: 'Large cells like egg cells. Some single cells can be seen with the naked eye.' },
+        { size: 1e-4, unit: 'micrometers', emoji: '🦌', description: 'Microscopic Life', fact: 'Dust mites and microscopic creatures. A whole ecosystem exists in your home.' },
+        { size: 1e-3, unit: 'millimeters', emoji: '🕷️', description: 'Small Insects', fact: 'The smallest insects and spiders. They experience the world very differently than we do.' },
+        { size: 1e-2, unit: 'centimeters', emoji: '🐜', description: 'Ants & Small Bugs', fact: 'Ants can carry 50 times their own body weight. They\'re incredibly strong for their size.' },
+        { size: 0.1, unit: 'meters', emoji: '🐭', description: 'Small Animals', fact: 'Mice and small birds. Their rapid heartbeats can reach 500 beats per minute.' },
+        { size: 0.5, unit: 'meters', emoji: '🐕', description: 'Medium Animals', fact: 'Cats and small dogs. They experience time differently due to their faster neural processing.' },
+        { size: 1, unit: 'meter', emoji: '🧑‍🚀', description: 'Human Scale', fact: 'You are here! Humans are perfectly positioned between the quantum and cosmic scales.' },
+        { size: 2, unit: 'meters', emoji: '🦒', description: 'Large Animals', fact: 'Tall humans and large animals. Blue whales have hearts the size of small cars.' },
+        { size: 10, unit: 'meters', emoji: '🌳', description: 'Trees', fact: 'Large trees. Some trees are older than human civilization and can live for thousands of years.' },
+        { size: 100, unit: 'meters', emoji: '🏢', description: 'Buildings', fact: 'Skyscrapers and large structures. The tallest building is over 800 meters tall.' },
+        { size: 1000, unit: 'kilometers', emoji: '🏔️', description: 'Mountains', fact: 'Mountain ranges. Mount Everest is 8.8 km tall, but that\'s tiny compared to what\'s coming.' },
+        
+        // Geographic scale (20-29)
+        { size: 1e4, unit: 'kilometers', emoji: '🏙️', description: 'Cities', fact: 'Large metropolitan areas. Some cities house more people than entire countries.' },
+        { size: 1e5, unit: 'kilometers', emoji: '🌍', description: 'Countries', fact: 'Small countries. Earth\'s surface is 71% water, but it looks tiny from space.' },
+        { size: 1e6, unit: 'kilometers', emoji: '🌎', description: 'Earth', fact: 'Our home planet, 12,756 km across. Earth is the only known planet with life in the universe.' },
+        { size: 1e7, unit: 'kilometers', emoji: '🌕', description: 'Earth-Moon System', fact: 'The Moon is slowly moving away from Earth at 3.8 cm per year.' },
+        { size: 1e8, unit: 'kilometers', emoji: '☀️', description: 'Inner Solar System', fact: 'Mercury, Venus, Earth, and Mars. The inner planets are rocky worlds like Earth.' },
+        { size: 1e9, unit: 'kilometers', emoji: '🪐', description: 'Outer Solar System', fact: 'Jupiter is so large that it could fit all other planets inside it with room to spare.' },
+        { size: 1e10, unit: 'kilometers', emoji: '🌌', description: 'Solar System', fact: 'Our entire solar system. It would take light over 8 hours to travel across it.' },
+        { size: 1e11, unit: 'kilometers', emoji: '☄️', description: 'Kuiper Belt', fact: 'Home to Pluto and countless icy objects. The edge of our solar system\'s influence.' },
+        { size: 1e12, unit: 'kilometers', emoji: '🌠', description: 'Oort Cloud', fact: 'A sphere of icy objects surrounding our solar system. Comets come from here.' },
+        { size: 1e13, unit: 'light-years', emoji: '⭐', description: 'Nearby Stars', fact: 'Proxima Centauri is our nearest star neighbor, 4.2 light-years away.' },
+        
+        // Stellar scale (30-39)
+        { size: 1e14, unit: 'light-years', emoji: '✨', description: 'Star Systems', fact: 'Most stars have planetary systems. There may be billions of Earth-like planets.' },
+        { size: 1e15, unit: 'light-years', emoji: '🌟', description: 'Star Clusters', fact: 'Groups of stars born together. They slowly drift apart over millions of years.' },
+        { size: 1e16, unit: 'light-years', emoji: '☁️', description: 'Nebulae', fact: 'Stellar nurseries where new stars are born. They\'re mostly empty space.' },
+        { size: 1e17, unit: 'light-years', emoji: '🌌', description: 'Local Stellar Neighborhood', fact: 'Our local group of nearby stars within a few hundred light-years.' },
+        { size: 1e18, unit: 'light-years', emoji: '💫', description: 'Galactic Arm', fact: 'We live in the Orion Arm of the Milky Way, between major spiral arms.' },
+        { size: 1e19, unit: 'light-years', emoji: '🌌', description: 'Galaxy Center', fact: 'The center of our galaxy contains a supermassive black hole 4 million times the mass of our Sun.' },
+        { size: 1e20, unit: 'light-years', emoji: '🌠', description: 'Milky Way Galaxy', fact: 'Our galaxy contains 200-400 billion stars. It would take 100,000 years for light to cross it.' },
+        { size: 1e21, unit: 'light-years', emoji: '🌌', description: 'Local Group', fact: 'Our galaxy group containing the Milky Way, Andromeda, and dozens of smaller galaxies.' },
+        { size: 1e22, unit: 'light-years', emoji: '🌌', description: 'Galaxy Clusters', fact: 'Groups of hundreds of galaxies bound together by gravity and dark matter.' },
+        { size: 1e23, unit: 'light-years', emoji: '🕳️', description: 'Superclusters', fact: 'Massive collections of galaxy clusters. We live in the Laniakea Supercluster.' },
+        
+        // Universal scale (40-60)
+        { size: 1e24, unit: 'light-years', emoji: '🌌', description: 'Observable Universe', fact: 'Everything we can see: 93 billion light-years across, containing 2 trillion galaxies.' },
+        { size: 1e25, unit: 'light-years', emoji: '♾️', description: 'Theoretical Universe', fact: 'The actual universe might be infinite, much larger than what we can observe.' },
+        { size: 1e26, unit: 'light-years', emoji: '🔄', description: 'Multiverse Theory', fact: 'Some theories suggest infinite parallel universes with different physical laws.' },
+        { size: 1e27, unit: 'units', emoji: '🌠', description: 'Cosmic Inflation', fact: 'The universe expanded faster than light in its first fraction of a second.' },
+        { size: 1e28, unit: 'units', emoji: '⚛️', description: 'Quantum Multiverse', fact: 'Every quantum event might create parallel universes in an infinite multiverse.' },
+        { size: 1e29, unit: 'units', emoji: '♾️', description: 'Mathematical Universe', fact: 'Some physicists believe all mathematical structures exist as physical realities.' },
+        { size: 1e30, unit: 'units', emoji: '🔮', description: 'Beyond Comprehension', fact: 'At this scale, we reach the limits of current scientific understanding and imagination.' }
+    ];
+    
+    function updateScale() {
+        const index = Math.min(parseInt(scaleSlider.value), scaleData.length - 1);
+        const data = scaleData[index];
+        
+        // Update display
+        if (data.size < 1e-12) {
+            scaleValue.textContent = `${data.size.toExponential(1)} meters`;
+        } else if (data.size < 1e-3) {
+            scaleValue.textContent = `${(data.size * 1e6).toFixed(1)} micrometers`;
+        } else if (data.size < 1) {
+            scaleValue.textContent = `${(data.size * 1000).toFixed(1)} millimeters`;
+        } else if (data.size < 1000) {
+            scaleValue.textContent = `${data.size.toFixed(1)} meters`;
+        } else if (data.size < 1e6) {
+            scaleValue.textContent = `${(data.size / 1000).toFixed(1)} kilometers`;
+        } else {
+            scaleValue.textContent = `${data.size.toExponential(1)} km`;
+        }
+        
+        scaleDescription.textContent = data.description;
+        scaleObject.textContent = data.emoji;
+        
+        // Update size of emoji based on scale
+        const baseSize = 4; // rem
+        const sizeMultiplier = Math.pow(2, (index - 15) / 10); // Scale around human size
+        const clampedSize = Math.max(1, Math.min(8, baseSize * sizeMultiplier));
+        scaleObject.style.fontSize = `${clampedSize}rem`;
+        
+        // Update comparison
+        if (index < 15) {
+            scaleComparison.textContent = `${15 - index} orders of magnitude smaller than human scale`;
+        } else if (index > 15) {
+            scaleComparison.textContent = `${index - 15} orders of magnitude larger than human scale`;
+        } else {
+            scaleComparison.textContent = 'You are here in the middle of known scales';
+        }
+        
+        // Update facts
+        scaleFacts.innerHTML = `<h4>Did you know?</h4><p>${data.fact}</p>`;
+        
+        // Color coding
+        scaleObject.style.filter = `hue-rotate(${index * 6}deg)`;
+    }
+    
+    scaleSlider.addEventListener('input', updateScale);
+    
+    // Initialize
+    updateScale();
+}
+
 // Add game-specific styles
 const gameStyles = `
     .game-area {
@@ -1801,6 +1968,162 @@ const gameStyles = `
     
     .fun-fact:last-child {
         border-bottom: none;
+    }
+    
+    /* Universe Scale Game */
+    .universe-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .universe-header h3 {
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+    
+    .universe-header p {
+        color: #666;
+    }
+    
+    .scale-controls {
+        margin-bottom: 2rem;
+    }
+    
+    .scale-slider-container {
+        position: relative;
+        margin: 0 auto;
+        max-width: 600px;
+    }
+    
+    .scale-slider {
+        width: 100%;
+        height: 8px;
+        border-radius: 4px;
+        background: linear-gradient(90deg, #ff6b6b 0%, #4ecdc4 25%, #45b7d1 50%, #96ceb4 75%, #feca57 100%);
+        outline: none;
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+    }
+    
+    .scale-slider::-webkit-slider-thumb {
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #fff;
+        border: 3px solid #667eea;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.2s ease;
+    }
+    
+    .scale-slider::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    .scale-slider::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #fff;
+        border: 3px solid #667eea;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .scale-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .scale-display {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .scale-display::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        pointer-events: none;
+    }
+    
+    .current-scale {
+        position: relative;
+        z-index: 2;
+        margin-bottom: 2rem;
+    }
+    
+    .scale-value {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .scale-description {
+        font-size: 1.2rem;
+        opacity: 0.9;
+    }
+    
+    .scale-visualization {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .scale-object {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        transition: all 0.5s ease;
+        display: inline-block;
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .scale-comparison {
+        font-size: 1rem;
+        opacity: 0.8;
+        font-style: italic;
+    }
+    
+    .scale-info {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+        text-align: left;
+    }
+    
+    .scale-facts h4 {
+        color: #667eea;
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+    }
+    
+    .scale-facts p {
+        color: #333;
+        line-height: 1.6;
+        margin: 0;
     }
 `;
 
