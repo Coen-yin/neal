@@ -50,7 +50,10 @@ function openGame(gameType) {
         'snake': 'Snake Classic',
         'puzzle': 'Number Puzzle',
         'reaction': 'Reaction Test',
-        'typing': 'Type Racer'
+        'typing': 'Type Racer',
+        'infinitecraft': 'Infinite Craft',
+        'passwordgame': 'Password Game',
+        'lifechecker': 'Life Checker'
     };
     
     gameTitle.textContent = gameTitles[gameType] || 'Game';
@@ -174,6 +177,102 @@ function getGameHTML(gameType) {
                 </div>
             `;
         
+        case 'infinitecraft':
+            return `
+                <div class="game-area">
+                    <div class="craft-header">
+                        <div class="discoveries-count">Discoveries: <span id="discoveryCount">4</span></div>
+                        <button id="resetCraft" class="game-btn">Reset</button>
+                    </div>
+                    <div class="craft-workspace">
+                        <div class="elements-sidebar">
+                            <h3>Elements</h3>
+                            <div id="elementsList" class="elements-list"></div>
+                        </div>
+                        <div class="craft-area">
+                            <div class="craft-zone" id="craftZone">
+                                <div class="craft-slot" id="slot1">Drop element here</div>
+                                <div class="craft-plus">+</div>
+                                <div class="craft-slot" id="slot2">Drop element here</div>
+                                <div class="craft-equals">=</div>
+                                <div class="craft-result" id="craftResult">?</div>
+                            </div>
+                            <button id="craftButton" class="game-btn craft-btn" disabled>Craft!</button>
+                        </div>
+                    </div>
+                    <div class="recent-discoveries" id="recentDiscoveries"></div>
+                </div>
+            `;
+        
+        case 'passwordgame':
+            return `
+                <div class="game-area">
+                    <div class="password-header">
+                        <h3>Create a password that satisfies all requirements</h3>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="rules-completed">
+                            <span id="rulesCompleted">0</span> / <span id="totalRules">8</span> rules satisfied
+                        </div>
+                    </div>
+                    <div class="password-input-container">
+                        <input type="text" id="passwordInput" placeholder="Enter your password here..." autocomplete="off">
+                        <div class="password-length">Length: <span id="passwordLength">0</span></div>
+                    </div>
+                    <div class="rules-list" id="rulesList"></div>
+                    <div class="game-info">
+                        <div id="passwordSuccess" class="success-message" style="display: none;">
+                            🎉 Congratulations! Your password satisfies all requirements!
+                        </div>
+                    </div>
+                </div>
+            `;
+        
+        case 'lifechecker':
+            return `
+                <div class="game-area">
+                    <div class="life-header">
+                        <h3>How much time have you spent alive?</h3>
+                        <p>Enter your birth date to see fascinating time calculations</p>
+                    </div>
+                    <div class="birth-input">
+                        <label for="birthDate">Your Birth Date:</label>
+                        <input type="date" id="birthDate" max="${new Date().toISOString().split('T')[0]}">
+                        <button id="calculateLife" class="game-btn">Calculate</button>
+                    </div>
+                    <div id="lifeStats" class="life-stats" style="display: none;">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number" id="yearsAlive">0</div>
+                                <div class="stat-label">Years</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="daysAlive">0</div>
+                                <div class="stat-label">Days</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="hoursAlive">0</div>
+                                <div class="stat-label">Hours</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="minutesAlive">0</div>
+                                <div class="stat-label">Minutes</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="secondsAlive">0</div>
+                                <div class="stat-label">Seconds</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number" id="heartbeats">0</div>
+                                <div class="stat-label">Heartbeats (est.)</div>
+                            </div>
+                        </div>
+                        <div class="fun-facts" id="funFacts"></div>
+                    </div>
+                </div>
+            `;
+        
         default:
             return '<p>Game not found!</p>';
     }
@@ -199,6 +298,15 @@ function initializeGame(gameType) {
             break;
         case 'typing':
             initTypingGame();
+            break;
+        case 'infinitecraft':
+            initInfiniteCraftGame();
+            break;
+        case 'passwordgame':
+            initPasswordGame();
+            break;
+        case 'lifechecker':
+            initLifeCheckerGame();
             break;
     }
 }
@@ -711,6 +819,422 @@ function initPuzzleGame() {
     createPuzzle();
 }
 
+// Infinite Craft Game
+function initInfiniteCraftGame() {
+    const elementsList = document.getElementById('elementsList');
+    const slot1 = document.getElementById('slot1');
+    const slot2 = document.getElementById('slot2');
+    const craftResult = document.getElementById('craftResult');
+    const craftButton = document.getElementById('craftButton');
+    const discoveryCount = document.getElementById('discoveryCount');
+    const resetButton = document.getElementById('resetCraft');
+    const recentDiscoveries = document.getElementById('recentDiscoveries');
+    
+    let elements = new Set(['Fire', 'Water', 'Earth', 'Wind']);
+    let discoveries = [];
+    let draggedElement = null;
+    let slot1Element = null;
+    let slot2Element = null;
+    
+    // Crafting recipes (simplified version of infinite craft)
+    const recipes = {
+        'Fire + Water': 'Steam',
+        'Fire + Earth': 'Lava',
+        'Fire + Wind': 'Smoke',
+        'Water + Earth': 'Mud',
+        'Water + Wind': 'Mist',
+        'Earth + Wind': 'Dust',
+        'Steam + Earth': 'Geyser',
+        'Lava + Water': 'Obsidian',
+        'Smoke + Water': 'Cloud',
+        'Mud + Fire': 'Brick',
+        'Mist + Fire': 'Rainbow',
+        'Dust + Water': 'Clay',
+        'Cloud + Earth': 'Mountain',
+        'Rainbow + Water': 'Waterfall',
+        'Mountain + Fire': 'Volcano',
+        'Volcano + Water': 'Island',
+        'Island + Wind': 'Desert',
+        'Desert + Water': 'Oasis',
+        'Clay + Fire': 'Pottery',
+        'Pottery + Water': 'Vase',
+        'Brick + Brick': 'Wall',
+        'Wall + Wall': 'House',
+        'House + Wind': 'Windmill',
+        'Windmill + Water': 'Energy',
+        'Energy + Earth': 'Plant',
+        'Plant + Water': 'Tree',
+        'Tree + Fire': 'Wood',
+        'Wood + Wood': 'Forest',
+        'Forest + Fire': 'Campfire',
+        'Campfire + Earth': 'Ash',
+        'Ash + Water': 'Soap',
+        'Plant + Wind': 'Seed',
+        'Seed + Earth': 'Garden',
+        'Garden + Water': 'Flower',
+        'Flower + Wind': 'Pollen',
+        'Tree + Wind': 'Leaves',
+        'Leaves + Fire': 'Autumn',
+        'Steam + Steam': 'Pressure',
+        'Pressure + Earth': 'Diamond',
+        'Diamond + Fire': 'Star',
+        'Star + Water': 'Wish',
+        'Wish + Earth': 'Magic',
+        'Magic + Fire': 'Phoenix',
+        'Phoenix + Water': 'Rebirth',
+        'Obsidian + Wind': 'Glass',
+        'Glass + Fire': 'Lens',
+        'Lens + Star': 'Telescope',
+        'Telescope + Earth': 'Science',
+        'Science + Water': 'Chemistry',
+        'Chemistry + Fire': 'Explosion',
+        'Explosion + Earth': 'Crater',
+        'Crater + Water': 'Lake',
+        'Lake + Wind': 'Wave',
+        'Wave + Earth': 'Beach',
+        'Beach + Fire': 'Sand',
+        'Sand + Wind': 'Sandstorm',
+        'Energy + Energy': 'Power',
+        'Power + Earth': 'Machine',
+        'Machine + Water': 'Robot',
+        'Robot + Fire': 'AI',
+        'AI + Wind': 'Future',
+        'Future + Earth': 'City',
+        'City + Water': 'Venice',
+        'Venice + Wind': 'Romance',
+        'Romance + Fire': 'Passion',
+        'Passion + Earth': 'Life'
+    };
+    
+    function renderElements() {
+        elementsList.innerHTML = '';
+        Array.from(elements).sort().forEach(element => {
+            const elementDiv = document.createElement('div');
+            elementDiv.className = 'element-item';
+            elementDiv.draggable = true;
+            elementDiv.textContent = element;
+            elementDiv.addEventListener('dragstart', handleDragStart);
+            elementsList.appendChild(elementDiv);
+        });
+        discoveryCount.textContent = elements.size;
+    }
+    
+    function handleDragStart(e) {
+        draggedElement = e.target.textContent;
+        e.target.style.opacity = '0.5';
+    }
+    
+    function handleDragEnd(e) {
+        e.target.style.opacity = '1';
+    }
+    
+    function handleDrop(e, slot) {
+        e.preventDefault();
+        if (draggedElement) {
+            slot.textContent = draggedElement;
+            slot.style.backgroundColor = '#e3f2fd';
+            
+            if (slot === slot1) {
+                slot1Element = draggedElement;
+            } else {
+                slot2Element = draggedElement;
+            }
+            
+            checkCraftability();
+        }
+    }
+    
+    function checkCraftability() {
+        if (slot1Element && slot2Element) {
+            craftButton.disabled = false;
+            const recipe1 = `${slot1Element} + ${slot2Element}`;
+            const recipe2 = `${slot2Element} + ${slot1Element}`;
+            const result = recipes[recipe1] || recipes[recipe2];
+            
+            if (result) {
+                craftResult.textContent = result;
+                craftResult.style.color = '#4caf50';
+            } else {
+                craftResult.textContent = 'Nothing';
+                craftResult.style.color = '#f44336';
+            }
+        } else {
+            craftButton.disabled = true;
+            craftResult.textContent = '?';
+            craftResult.style.color = '#666';
+        }
+    }
+    
+    function craft() {
+        if (slot1Element && slot2Element) {
+            const recipe1 = `${slot1Element} + ${slot2Element}`;
+            const recipe2 = `${slot2Element} + ${slot1Element}`;
+            const result = recipes[recipe1] || recipes[recipe2];
+            
+            if (result && !elements.has(result)) {
+                elements.add(result);
+                discoveries.push({
+                    element: result,
+                    recipe: recipe1,
+                    timestamp: new Date()
+                });
+                
+                // Show discovery animation
+                showDiscovery(result);
+                renderElements();
+                updateRecentDiscoveries();
+            }
+            
+            // Reset slots
+            clearSlots();
+        }
+    }
+    
+    function clearSlots() {
+        slot1.textContent = 'Drop element here';
+        slot2.textContent = 'Drop element here';
+        slot1.style.backgroundColor = '';
+        slot2.style.backgroundColor = '';
+        slot1Element = null;
+        slot2Element = null;
+        checkCraftability();
+    }
+    
+    function showDiscovery(element) {
+        const discovery = document.createElement('div');
+        discovery.className = 'discovery-popup';
+        discovery.innerHTML = `🎉 Discovered: <strong>${element}</strong>!`;
+        document.body.appendChild(discovery);
+        
+        setTimeout(() => {
+            discovery.style.opacity = '0';
+            setTimeout(() => discovery.remove(), 300);
+        }, 2000);
+    }
+    
+    function updateRecentDiscoveries() {
+        const recent = discoveries.slice(-5).reverse();
+        recentDiscoveries.innerHTML = recent.map(d => 
+            `<div class="recent-discovery">
+                <span class="discovery-element">${d.element}</span>
+                <span class="discovery-recipe">${d.recipe}</span>
+            </div>`
+        ).join('');
+    }
+    
+    function resetGame() {
+        elements = new Set(['Fire', 'Water', 'Earth', 'Wind']);
+        discoveries = [];
+        clearSlots();
+        renderElements();
+        recentDiscoveries.innerHTML = '';
+    }
+    
+    // Event listeners
+    slot1.addEventListener('dragover', e => e.preventDefault());
+    slot1.addEventListener('drop', e => handleDrop(e, slot1));
+    
+    slot2.addEventListener('dragover', e => e.preventDefault());
+    slot2.addEventListener('drop', e => handleDrop(e, slot2));
+    
+    craftButton.addEventListener('click', craft);
+    resetButton.addEventListener('click', resetGame);
+    
+    // Add event listeners to elements (will be set in renderElements)
+    elementsList.addEventListener('dragend', handleDragEnd);
+    
+    renderElements();
+}
+
+// Password Game
+function initPasswordGame() {
+    const passwordInput = document.getElementById('passwordInput');
+    const passwordLength = document.getElementById('passwordLength');
+    const rulesList = document.getElementById('rulesList');
+    const rulesCompleted = document.getElementById('rulesCompleted');
+    const totalRules = document.getElementById('totalRules');
+    const progressFill = document.getElementById('progressFill');
+    const successMessage = document.getElementById('passwordSuccess');
+    
+    const rules = [
+        {
+            id: 'length',
+            text: 'Your password must be at least 8 characters long',
+            check: (password) => password.length >= 8
+        },
+        {
+            id: 'uppercase',
+            text: 'Your password must include an uppercase letter',
+            check: (password) => /[A-Z]/.test(password)
+        },
+        {
+            id: 'lowercase',
+            text: 'Your password must include a lowercase letter',
+            check: (password) => /[a-z]/.test(password)
+        },
+        {
+            id: 'number',
+            text: 'Your password must include a number',
+            check: (password) => /\d/.test(password)
+        },
+        {
+            id: 'special',
+            text: 'Your password must include a special character (!@#$%^&*)',
+            check: (password) => /[!@#$%^&*]/.test(password)
+        },
+        {
+            id: 'roman',
+            text: 'Your password must include a Roman numeral',
+            check: (password) => /[IVXLCDM]/.test(password)
+        },
+        {
+            id: 'sum',
+            text: 'The digits in your password must add up to 25',
+            check: (password) => {
+                const digits = password.match(/\d/g);
+                if (!digits) return false;
+                const sum = digits.reduce((acc, digit) => acc + parseInt(digit), 0);
+                return sum === 25;
+            }
+        },
+        {
+            id: 'chicken',
+            text: 'Your password must include the word "chicken"',
+            check: (password) => password.toLowerCase().includes('chicken')
+        }
+    ];
+    
+    function renderRules() {
+        totalRules.textContent = rules.length;
+        rulesList.innerHTML = rules.map(rule => 
+            `<div class="rule-item" id="rule-${rule.id}">
+                <div class="rule-status">❌</div>
+                <div class="rule-text">${rule.text}</div>
+            </div>`
+        ).join('');
+    }
+    
+    function checkPassword() {
+        const password = passwordInput.value;
+        passwordLength.textContent = password.length;
+        
+        let completed = 0;
+        rules.forEach(rule => {
+            const ruleElement = document.getElementById(`rule-${rule.id}`);
+            const statusElement = ruleElement.querySelector('.rule-status');
+            
+            if (rule.check(password)) {
+                ruleElement.classList.add('rule-satisfied');
+                statusElement.textContent = '✅';
+                completed++;
+            } else {
+                ruleElement.classList.remove('rule-satisfied');
+                statusElement.textContent = '❌';
+            }
+        });
+        
+        rulesCompleted.textContent = completed;
+        const progress = (completed / rules.length) * 100;
+        progressFill.style.width = `${progress}%`;
+        
+        if (completed === rules.length) {
+            successMessage.style.display = 'block';
+            progressFill.style.background = 'linear-gradient(135deg, #4caf50 0%, #8bc34a 100%)';
+        } else {
+            successMessage.style.display = 'none';
+            progressFill.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        }
+    }
+    
+    passwordInput.addEventListener('input', checkPassword);
+    
+    renderRules();
+    checkPassword();
+}
+
+// Life Checker Game
+function initLifeCheckerGame() {
+    const birthDateInput = document.getElementById('birthDate');
+    const calculateButton = document.getElementById('calculateLife');
+    const lifeStats = document.getElementById('lifeStats');
+    const funFacts = document.getElementById('funFacts');
+    
+    function calculateLife() {
+        const birthDate = new Date(birthDateInput.value);
+        const now = new Date();
+        
+        if (!birthDateInput.value || birthDate > now) {
+            alert('Please enter a valid birth date!');
+            return;
+        }
+        
+        const diffMs = now - birthDate;
+        const diffSeconds = Math.floor(diffMs / 1000);
+        const diffMinutes = Math.floor(diffSeconds / 60);
+        const diffHours = Math.floor(diffMinutes / 60);
+        const diffDays = Math.floor(diffHours / 24);
+        const diffYears = diffDays / 365.25;
+        
+        // Estimated heartbeats (average 70 bpm)
+        const heartbeats = Math.floor(diffMinutes * 70);
+        
+        // Update stats with animations
+        animateCounter(document.getElementById('yearsAlive'), Math.floor(diffYears));
+        animateCounter(document.getElementById('daysAlive'), diffDays);
+        animateCounter(document.getElementById('hoursAlive'), diffHours);
+        animateCounter(document.getElementById('minutesAlive'), diffMinutes);
+        animateCounter(document.getElementById('secondsAlive'), diffSeconds);
+        animateCounter(document.getElementById('heartbeats'), heartbeats);
+        
+        // Generate fun facts
+        generateFunFacts(diffDays, diffYears);
+        
+        lifeStats.style.display = 'block';
+    }
+    
+    function animateCounter(element, target) {
+        let current = 0;
+        const increment = target / 100;
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                current = target;
+                clearInterval(timer);
+            }
+            element.textContent = Math.floor(current).toLocaleString();
+        }, 20);
+    }
+    
+    function generateFunFacts(days, years) {
+        const facts = [
+            `You've experienced approximately ${Math.floor(years * 4)} seasons`,
+            `You've lived through about ${Math.floor(days / 7)} weeks`,
+            `You've seen approximately ${Math.floor(days)} sunrises and sunsets`,
+            `You've breathed roughly ${Math.floor(days * 20000).toLocaleString()} times`,
+            `You've blinked about ${Math.floor(days * 15000).toLocaleString()} times`,
+            `You've slept for roughly ${Math.floor(years * 2920)} hours (8 hours/day)`,
+            `You've probably consumed around ${Math.floor(days * 2)} liters of water`,
+            `Your hair has grown approximately ${Math.floor(years * 6)} inches`,
+            `You've lived through ${Math.floor(years / 4)} leap years`,
+            `The Earth has traveled ${Math.floor(years * 584000000).toLocaleString()} miles around the sun with you on it`
+        ];
+        
+        const selectedFacts = facts.sort(() => Math.random() - 0.5).slice(0, 5);
+        funFacts.innerHTML = selectedFacts.map(fact => 
+            `<div class="fun-fact">🌟 ${fact}</div>`
+        ).join('');
+    }
+    
+    calculateButton.addEventListener('click', calculateLife);
+    
+    // Allow Enter key to calculate
+    birthDateInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            calculateLife();
+        }
+    });
+}
+
 // Add game-specific styles
 const gameStyles = `
     .game-area {
@@ -916,6 +1440,367 @@ const gameStyles = `
         0% { transform: scale(1); }
         50% { transform: scale(1.05); }
         100% { transform: scale(1); }
+    }
+    
+    /* Infinite Craft Game */
+    .craft-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+    
+    .discoveries-count {
+        font-weight: 600;
+        color: #667eea;
+    }
+    
+    .craft-workspace {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .elements-sidebar {
+        flex: 1;
+        max-width: 250px;
+    }
+    
+    .elements-sidebar h3 {
+        margin-bottom: 1rem;
+        color: #333;
+    }
+    
+    .elements-list {
+        max-height: 300px;
+        overflow-y: auto;
+        padding: 0.5rem;
+        border: 2px dashed #ddd;
+        border-radius: 10px;
+        background: #f9f9f9;
+    }
+    
+    .element-item {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        margin: 0.25rem 0;
+        border-radius: 20px;
+        cursor: grab;
+        transition: all 0.2s ease;
+        user-select: none;
+    }
+    
+    .element-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+    }
+    
+    .element-item:active {
+        cursor: grabbing;
+    }
+    
+    .craft-area {
+        flex: 2;
+        text-align: center;
+    }
+    
+    .craft-zone {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding: 2rem;
+        background: #f8f9fa;
+        border-radius: 15px;
+        border: 2px dashed #ddd;
+    }
+    
+    .craft-slot {
+        width: 120px;
+        height: 60px;
+        border: 2px dashed #ccc;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        color: #999;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+    
+    .craft-slot:hover {
+        border-color: #667eea;
+        background: #f0f7ff;
+    }
+    
+    .craft-plus, .craft-equals {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .craft-result {
+        width: 120px;
+        height: 60px;
+        border: 2px solid #667eea;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    
+    .craft-btn {
+        font-size: 1.2rem;
+        padding: 1rem 2rem;
+    }
+    
+    .recent-discoveries {
+        margin-top: 2rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+    
+    .recent-discovery {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem;
+        margin: 0.25rem 0;
+        background: white;
+        border-radius: 5px;
+    }
+    
+    .discovery-element {
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .discovery-recipe {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .discovery-popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(135deg, #4caf50 0%, #8bc34a 100%);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 25px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        box-shadow: 0 8px 32px rgba(76, 175, 80, 0.3);
+        z-index: 10000;
+        animation: popIn 0.3s ease;
+        transition: opacity 0.3s ease;
+    }
+    
+    @keyframes popIn {
+        0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+        100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+    
+    /* Password Game */
+    .password-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .password-header h3 {
+        margin-bottom: 1rem;
+        color: #333;
+    }
+    
+    .progress-bar {
+        width: 100%;
+        height: 20px;
+        background: #f0f0f0;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        width: 0%;
+        transition: all 0.3s ease;
+        border-radius: 10px;
+    }
+    
+    .rules-completed {
+        font-weight: 600;
+        color: #667eea;
+    }
+    
+    .password-input-container {
+        margin-bottom: 2rem;
+    }
+    
+    #passwordInput {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.1rem;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        outline: none;
+        transition: border-color 0.3s ease;
+        margin-bottom: 0.5rem;
+    }
+    
+    #passwordInput:focus {
+        border-color: #667eea;
+    }
+    
+    .password-length {
+        text-align: right;
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .rules-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .rule-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem;
+        margin: 0.5rem 0;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #f44336;
+        transition: all 0.3s ease;
+    }
+    
+    .rule-item.rule-satisfied {
+        background: #e8f5e8;
+        border-left-color: #4caf50;
+    }
+    
+    .rule-status {
+        margin-right: 1rem;
+        font-size: 1.2rem;
+    }
+    
+    .rule-text {
+        flex: 1;
+        font-weight: 500;
+    }
+    
+    .success-message {
+        background: linear-gradient(135deg, #4caf50 0%, #8bc34a 100%);
+        color: white;
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+        font-weight: bold;
+        animation: slideIn 0.5s ease;
+    }
+    
+    /* Life Checker Game */
+    .life-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .life-header h3 {
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+    
+    .life-header p {
+        color: #666;
+    }
+    
+    .birth-input {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .birth-input label {
+        font-weight: 500;
+        color: #333;
+    }
+    
+    #birthDate {
+        padding: 0.5rem;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.3s ease;
+    }
+    
+    #birthDate:focus {
+        border-color: #667eea;
+    }
+    
+    .life-stats {
+        animation: fadeIn 0.5s ease;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem 1rem;
+        border-radius: 15px;
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .fun-facts {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 10px;
+    }
+    
+    .fun-fact {
+        padding: 0.5rem 0;
+        color: #333;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .fun-fact:last-child {
+        border-bottom: none;
     }
 `;
 
