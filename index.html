@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameHub - Play Amazing Games</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h1>GameHub</h1>
+            </div>
+            <div class="nav-links">
+                <a href="#home" class="nav-link active">Home</a>
+                <a href="#games" class="nav-link">Games</a>
+                <a href="#about" class="nav-link">About</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section id="home" class="hero">
+            <div class="hero-content">
+                <h1 class="hero-title">Welcome to GameHub</h1>
+                <p class="hero-subtitle">The ultimate destination for amazing web games</p>
+                <button class="cta-button" onclick="scrollToGames()">Start Playing</button>
+            </div>
+            <div class="hero-animation">
+                <div class="floating-shapes">
+                    <div class="shape shape-1"></div>
+                    <div class="shape shape-2"></div>
+                    <div class="shape shape-3"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="games" class="games-section">
+            <div class="container">
+                <h2 class="section-title">Featured Games</h2>
+                <div class="games-grid">
+                    <div class="game-card" onclick="openGame('clicker')">
+                        <div class="game-icon">🎯</div>
+                        <h3>Click Master</h3>
+                        <p>Test your clicking speed and precision</p>
+                        <div class="play-button">Play Now</div>
+                    </div>
+                    
+                    <div class="game-card" onclick="openGame('memory')">
+                        <div class="game-icon">🧠</div>
+                        <h3>Memory Challenge</h3>
+                        <p>Train your brain with this memory game</p>
+                        <div class="play-button">Play Now</div>
+                    </div>
+                    
+                    <div class="game-card" onclick="openGame('snake')">
+                        <div class="game-icon">🐍</div>
+                        <h3>Snake Classic</h3>
+                        <p>The classic snake game reimagined</p>
+                        <div class="play-button">Play Now</div>
+                    </div>
+                    
+                    <div class="game-card" onclick="openGame('puzzle')">
+                        <div class="game-icon">🧩</div>
+                        <h3>Number Puzzle</h3>
+                        <p>Solve challenging number puzzles</p>
+                        <div class="play-button">Play Now</div>
+                    </div>
+                    
+                    <div class="game-card" onclick="openGame('reaction')">
+                        <div class="game-icon">⚡</div>
+                        <h3>Reaction Test</h3>
+                        <p>How fast are your reflexes?</p>
+                        <div class="play-button">Play Now</div>
+                    </div>
+                    
+                    <div class="game-card" onclick="openGame('typing')">
+                        <div class="game-icon">⌨️</div>
+                        <h3>Type Racer</h3>
+                        <p>Improve your typing speed</p>
+                        <div class="play-button">Play Now</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="about-section">
+            <div class="container">
+                <h2 class="section-title">About GameHub</h2>
+                <p class="about-text">GameHub is a modern gaming platform designed to provide the best web gaming experience. Our games are carefully crafted with smooth animations, responsive design, and engaging gameplay.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Game Modal -->
+    <div id="gameModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="gameTitle">Game</h3>
+                <span class="close" onclick="closeGame()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="gameContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 GameHub. Made with ❤️ for gamers everywhere.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
